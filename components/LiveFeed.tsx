@@ -66,85 +66,104 @@ export default function LiveFeed({ initialUpdates }: LiveFeedProps) {
   };
 
   return (
-    <div className="space-y-8 sm:space-y-10">
-      <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm -mx-4 sm:-mx-6 px-4 sm:px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+    <section
+      aria-labelledby="live-feed-heading"
+      className="space-y-8 sm:space-y-10 w-full max-w-full overflow-hidden"
+    >
+      {/* Live status header – no longer sticky, with improved wrapping for small screens */}
+      <div className="bg-background/95 backdrop-blur-sm -mx-4 sm:-mx-6 px-4 sm:px-6 py-4 border-b border-border">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* Left section: live indicator and connection status */}
+          <div className="flex items-center gap-3 flex-wrap">
             <div className="relative flex items-center">
-              <div className="w-2 h-2 bg-emerald-600 rounded-full" />
+              <div className="w-2 h-2 bg-primary rounded-full" />
               <div
-                className={`absolute inset-0 w-2 h-2 bg-emerald-600 rounded-full animate-ping ${
+                className={`absolute inset-0 w-2 h-2 bg-primary rounded-full animate-ping ${
                   isConnected ? "opacity-75" : "opacity-0"
                 }`}
               />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-gray-900">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-medium text-foreground whitespace-nowrap">
                 Live Updates
               </span>
-              <span className="text-xs text-gray-400 hidden sm:inline">•</span>
+              <span className="text-xs text-muted-foreground hidden sm:inline">
+                •
+              </span>
               <span
-                className={`text-xs ${
-                  isConnected ? "text-emerald-600" : "text-gray-400"
+                className={`text-xs whitespace-nowrap ${
+                  isConnected ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 {isConnected ? "Connected" : "Reconnecting..."}
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-500">{formatLastUpdated()}</span>
-            <span className="text-xs font-mono bg-gray-100 px-3 py-1.5 text-gray-700">
+
+          {/* Right section: last updated and update count */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              {formatLastUpdated()}
+            </span>
+            <span className="text-xs font-mono bg-muted px-3 py-1.5 text-foreground whitespace-nowrap">
               {updates.length} {updates.length === 1 ? "update" : "updates"}
             </span>
           </div>
         </div>
       </div>
 
+      {/* Updates list – each article has max width and proper text wrapping */}
       <div className="space-y-5 sm:space-y-6">
         {updates.map((update, index) => (
           <article
             key={update._id}
-            className="relative bg-white border border-gray-200 p-6 sm:p-8"
+            className="relative bg-background border border-border p-6 sm:p-8 w-full max-w-full overflow-hidden"
+            aria-labelledby={update.title ? `title-${update._id}` : undefined}
           >
             {index === 0 && (
               <div className="absolute -top-px -left-px flex">
-                <span className="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium border-b border-r border-emerald-200">
+                <span className="px-3 py-1.5 bg-primary-light text-primary-dark text-xs font-medium border-b border-r border-primary/20 whitespace-nowrap">
                   Latest
                 </span>
               </div>
             )}
 
             <div className={index === 0 ? "mt-8" : ""}>
-              <div className="flex items-start justify-between gap-4 mb-3">
+              {/* Header with title and timestamp */}
+              <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
                 {update.title && (
-                  <h2 className="font-semibold text-gray-900 text-lg sm:text-xl tracking-tight">
+                  <h2
+                    id={`title-${update._id}`}
+                    className="font-semibold text-foreground text-lg sm:text-xl tracking-tight break-words"
+                  >
                     {update.title}
                   </h2>
                 )}
-                <div className="flex flex-col items-end gap-1 ml-auto">
+                <div className="flex flex-col items-end gap-1 ml-auto shrink-0">
                   <time
-                    className="text-xs text-gray-400 whitespace-nowrap font-mono"
+                    className="text-xs text-muted-foreground whitespace-nowrap font-mono"
                     dateTime={update.publishedAt}
                     title={formatFullDate(update.publishedAt)}
                   >
                     {getTimeAgo(update.publishedAt)}
                   </time>
-                  <span className="text-[10px] text-gray-300 font-mono">
+                  <span className="text-[10px] text-muted-foreground/60 font-mono whitespace-nowrap">
                     {formatTime(update.publishedAt)}
                   </span>
                 </div>
               </div>
 
+              {/* Content – ensures long words break */}
               <div className="prose prose-sm sm:prose-base max-w-none">
-                <p className="text-gray-700 text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                <p className="text-foreground/80 text-sm sm:text-base leading-relaxed whitespace-pre-wrap break-words">
                   {update.content}
                 </p>
               </div>
 
+              {/* Read more button (placeholder, non-functional) */}
               {update.content.length > 200 && (
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <button className="text-xs text-gray-500 hover:text-gray-700 group">
+                <div className="mt-4 pt-4 border-t border-border">
+                  <button className="text-xs text-muted-foreground hover:text-foreground group">
                     Read more
                     <span className="inline-block ml-1 group-hover:translate-x-1 transition-transform">
                       →
@@ -157,11 +176,12 @@ export default function LiveFeed({ initialUpdates }: LiveFeedProps) {
         ))}
       </div>
 
+      {/* Empty state */}
       {updates.length === 0 && (
-        <div className="text-center py-16 sm:py-20 px-6 border border-gray-200 bg-gray-50">
-          <div className="w-16 h-16 mx-auto mb-4 border border-gray-200 bg-white flex items-center justify-center">
+        <div className="text-center py-16 sm:py-20 px-6 border border-border bg-muted">
+          <div className="w-16 h-16 mx-auto mb-4 border border-border bg-background flex items-center justify-center">
             <svg
-              className="w-6 h-6 text-gray-400"
+              className="w-6 h-6 text-muted-foreground"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -175,25 +195,26 @@ export default function LiveFeed({ initialUpdates }: LiveFeedProps) {
               />
             </svg>
           </div>
-          <h3 className="text-gray-900 text-base sm:text-lg font-medium mb-2">
+          <h3 className="text-foreground text-base sm:text-lg font-medium mb-2">
             No updates yet
           </h3>
-          <p className="text-gray-500 text-sm sm:text-base max-w-sm mx-auto">
+          <p className="text-muted-foreground text-sm sm:text-base max-w-sm mx-auto">
             Check back soon
           </p>
         </div>
       )}
 
+      {/* End of feed */}
       {updates.length > 0 && (
         <div className="relative flex justify-center pt-4 sm:pt-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200" />
+            <div className="w-full border-t border-border" />
           </div>
-          <span className="relative bg-white px-4 text-xs text-gray-400">
+          <span className="relative bg-background px-4 text-xs text-muted-foreground">
             End of feed
           </span>
         </div>
       )}
-    </div>
+    </section>
   );
 }
